@@ -1,0 +1,273 @@
+<!-- pages/ai/ai.wxml -->
+<view class="container">
+  <!-- 菜单按钮 -->
+  <view class="menu-btn" bindtap="toggleMenu">
+    <text class="menu-icon">☰</text>
+  </view>
+
+  <!-- 左侧滑动菜单 -->
+  <view class="menu-overlay" wx:if="{{showMenu}}" bindtap="toggleMenu"></view>
+  <view class="menu-panel {{showMenu ? 'menu-show' : ''}}">
+    <view class="menu-header">
+      <text class="menu-title" wx:if="{{!showHistoryInMenu}}">AI智能助手菜单</text>
+      <text class="menu-title" wx:else>历史会话</text>
+      <text class="menu-close" bindtap="toggleMenu">✕</text>
+    </view>
+    
+    <!-- 菜单项列表 -->
+    <view class="menu-items" wx:if="{{!showHistoryInMenu}}">
+      <view class="menu-item" bindtap="newChat">
+        <text class="menu-item-icon">➕</text>
+        <text class="menu-item-text">新建对话</text>
+      </view>
+      <view class="menu-item" bindtap="viewHistory">
+        <text class="menu-item-icon">💬</text>
+        <text class="menu-item-text">历史会话</text>
+      </view>
+      <view class="menu-item" bindtap="openSearch">
+        <text class="menu-item-icon">🔍</text>
+        <text class="menu-item-text">搜索对话</text>
+      </view>
+      <view class="menu-item" bindtap="clearHistory">
+        <text class="menu-item-icon">🗑️</text>
+        <text class="menu-item-text">删除当前对话</text>
+      </view>
+    </view>
+    
+    <!-- 历史会话列表（在菜单内） -->
+    <view class="menu-history-list" wx:if="{{showHistoryInMenu}}">
+      <view class="menu-back" bindtap="backToMenu">
+        <text class="back-icon">‹</text>
+        <text>返回菜单</text>
+      </view>
+      <scroll-view class="conv-list-in-menu" scroll-y>
+        <block wx:for="{{conversations}}" wx:key="id">
+          <view 
+            class="conv-item-in-menu {{item.id === currentConversationId ? 'conv-active' : ''}}"
+            bindtap="switchConversation"
+            bindlongpress="onConversationLongPress"
+            data-id="{{item.id}}"
+          >
+            <text class="conv-name-in-menu">{{item.title}}</text>
+            <text class="conv-meta-in-menu">{{item.messages.length}} 条消息</text>
+          </view>
+        </block>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 搜索面板（全屏） -->
+  <view class="search-panel" wx:if="{{showSearch}}">
+    <view class="search-header">
+      <input class="search-input" placeholder="搜索当前对话内容..." bindinput="onSearchInput" value="{{searchKeyword}}" focus="{{true}}" />
+      <view class="search-cancel" bindtap="closeSearch">取消</view>
+    </view>
+    <scroll-view class="search-results" scroll-y wx:if="{{searchResults.length > 0}}">
+      <block wx:for="{{searchResults}}" wx:key="index">
+        <view class="search-item" bindtap="goToSearchResult" data-index="{{item.index}}">
+          <view class="search-item-header">
+            <text class="search-role {{item.role}}">{{item.role === 'user' ? '我' : 'AI'}}</text>
+            <text class="search-time">{{item.time}}</text>
+          </view>
+          <view class="search-snippet">{{item.snippet}}</view>
+        </view>
+      </block>
+    </scroll-view>
+    <view class="search-empty" wx:if="{{searchKeyword && searchResults.length === 0}}">未找到相关对话</view>
+  </view>
+
+  <!-- 顶部留白 -->
+  <view class="top-spacer"></view>
+
+  <!-- 聊天区域 -->
+  <view class="chat-container">
+    <scroll-view 
+      class="message-list" 
+      scroll-y 
+      scroll-top="{{scrollTop}}"
+      scroll-into-view="{{scrollToView}}"
+      scroll-with-animation="{{true}}"
+      bindscroll="onScroll"
+      id="messageList"
+      show-scrollbar="{{false}}"
+      enhanced
+    >
+      <view class="top-spacer-in-scroll"></view>
+
+      <block wx:for="{{messages}}" wx:key="index" wx:for-index="msgIndex">
+        <!-- AI消息 -->
+        <view class="message-item ai-message" wx:if="{{item.role === 'ai'}}" id="msg-{{msgIndex}}">
+          <view class="avatar-wrapper">
+            <view class="avatar ai-avatar"><text>AI</text></view>
+            <view class="avatar-glow"></view>
+          </view>
+          <view class="bubble-wrapper">
+            <view class="bubble ai-bubble">
+              <scroll-view scroll-y class="bubble-text-scroll" wx:if="{{item.parsedContent && item.parsedContent.length > 10}}">
+                <view class="message-content">
+                  <block wx:for="{{item.parsedContent}}" wx:key="index">
+                    <text wx:if="{{item.type === 'text'}}">{{item.content}}</text>
+                    <text wx:elif="{{item.type === 'link'}}" class="rich-link" data-url="{{item.url}}" bindtap="handleLinkTap">{{item.content}}</text>
+                  </block>
+                </view>
+              </scroll-view>
+              <view class="message-content" wx:else>
+                <block wx:for="{{item.parsedContent || [{type: 'text', content: item.content}]}}" wx:key="index">
+                  <text wx:if="{{item.type === 'text'}}">{{item.content}}</text>
+                  <text wx:elif="{{item.type === 'link'}}" class="rich-link" data-url="{{item.url}}" bindtap="handleLinkTap">{{item.content}}</text>
+                </block>
+              </view>
+              <view class="feedback-actions" wx:if="{{item.isFeedbackList}}">
+                <button class="feedback-action-btn" bindtap="goToFeedbackList">前往反馈记录页查看</button>
+              </view>
+              <view class="feedback-actions" wx:if="{{item.isFeedbackDetail}}">
+                <button class="feedback-action-btn" bindtap="goToFeedbackDetail" data-id="{{item.feedbackId}}">查看反馈详情</button>
+              </view>
+            </view>
+            <view class="bubble-time">{{formatTime(item.time)}}</view>
+          </view>
+        </view>
+
+        <!-- 用户消息 -->
+        <view class="message-item user-message" wx:else id="msg-{{msgIndex}}" bindlongpress="copyMessage" data-content="{{item.content}}">
+          <view class="bubble-wrapper">
+            <view class="bubble user-bubble">
+              <scroll-view scroll-y class="bubble-text-scroll" wx:if="{{item.content && item.content.length > 200}}">
+                <text class="bubble-text">{{item.content}}</text>
+              </scroll-view>
+              <text class="bubble-text" wx:else>{{item.content}}</text>
+            </view>
+            <view class="bubble-time user-time">{{formatTime(item.time)}}</view>
+          </view>
+          <view class="avatar-wrapper">
+            <view class="avatar user-avatar"><text>{{userAvatarText}}</text></view>
+            <view class="avatar-glow"></view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 加载中 -->
+      <view class="message-item ai-message" wx:if="{{isLoading}}">
+        <view class="avatar-wrapper"><view class="avatar ai-avatar">AI</view></view>
+        <view class="bubble-wrapper">
+          <view class="bubble ai-bubble loading-bubble">
+            <view class="typing-indicator">
+              <view class="dot"></view><view class="dot"></view><view class="dot"></view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="scroll-bottom-btn" wx:if="{{showScrollBtn}}" bindtap="scrollToBottom"><text class="btn-icon">⬇️</text></view>
+  </view>
+
+  <!-- 快捷问题区域 -->
+  <view class="quick-questions" wx:if="{{messages.length === 1 && !isLoading}}">
+    <view class="quick-header">
+      <text class="section-title">✨ 常见问题</text>
+      <text class="section-subtitle">点击快速提问</text>
+    </view>
+    <scroll-view class="question-scroll" scroll-x="{{true}}" show-scrollbar="{{false}}">
+      <view class="question-grid">
+        <view class="question-item" bindtap="sendQuickQuestion" data-question="如何申请农业补贴？">
+          <view class="question-icon-wrapper" style="background: #e8f5e8;"><text class="question-icon">🌾</text></view>
+          <text class="question-text">农业补贴</text>
+        </view>
+        <view class="question-item" bindtap="sendQuickQuestion" data-question="医保报销流程是什么？">
+          <view class="question-icon-wrapper" style="background: #e3f2fd;"><text class="question-icon">🏥</text></view>
+          <text class="question-text">医保报销</text>
+        </view>
+        <view class="question-item" bindtap="sendQuickQuestion" data-question="低保申请条件">
+          <view class="question-icon-wrapper" style="background: #fff3e0;"><text class="question-icon">👥</text></view>
+          <text class="question-text">低保申请</text>
+        </view>
+        <view class="question-item" bindtap="sendQuickQuestion" data-question="道路损坏如何反馈？">
+          <view class="question-icon-wrapper" style="background: #f3e5f5;"><text class="question-icon">🛣️</text></view>
+          <text class="question-text">道路维修</text>
+        </view>
+        <view class="question-item" bindtap="sendQuickQuestion" data-question="我的反馈记录">
+          <view class="question-icon-wrapper" style="background: #ffe0b2;"><text class="question-icon">📋</text></view>
+          <text class="question-text">反馈记录</text>
+        </view>
+        <view class="question-item" bindtap="sendQuickQuestion" data-question="最近一条反馈的进度">
+          <view class="question-icon-wrapper" style="background: #c8e6c9;"><text class="question-icon">📊</text></view>
+          <text class="question-text">反馈进度</text>
+        </view>
+        <view class="question-item" bindtap="sendQuickQuestion" data-question="处理结果查询">
+          <view class="question-icon-wrapper" style="background: #ffcdd2;"><text class="question-icon">🔍</text></view>
+          <text class="question-text">处理结果</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 语音输入面板 -->
+  <view class="voice-input-panel" wx:if="{{showVoiceInput}}">
+    <view class="voice-panel-header">
+      <text class="voice-panel-title">语音输入</text>
+      <text class="voice-panel-close" bindtap="cancelRecording">✕</text>
+    </view>
+    
+    <view class="recording-status" wx:if="{{isRecording}}">
+      <view class="recording-animation">
+        <view class="recording-wave"></view><view class="recording-wave"></view><view class="recording-wave"></view><view class="recording-wave"></view>
+      </view>
+      <text class="recording-time">{{formattedRecordingTime}}</text>
+    </view>
+
+    <view class="recognize-result" wx:if="{{showRecognizeResult}}">
+      <view class="result-text">
+        <text wx:if="{{recognizeError}}" class="error-text">识别失败：{{recognizeError}}</text>
+      </view>
+      <view class="result-actions" wx:if="{{recognizeError}}">
+        <button class="result-btn retry-btn" bindtap="retryRecognize">重试</button>
+        <button class="result-btn cancel-btn" bindtap="cancelRecognizeResult">取消</button>
+      </view>
+    </view>
+
+    <view class="record-btn-wrapper">
+      <view class="record-btn {{isRecording ? 'recording' : ''}}" 
+            bindtouchstart="startRecording" 
+            bindtouchend="stopRecording"
+            bindtouchcancel="stopRecording">
+        <text class="record-icon">{{isRecording ? '⏹️' : '🎤'}}</text>
+      </view>
+      <text class="record-tip">{{isRecording ? '松开结束' : '按住说话'}}</text>
+    </view>
+
+    <view class="play-record" wx:if="{{tempVoicePath && !isRecording && !showRecognizeResult}}">
+      <button class="play-btn {{isPlaying ? 'playing' : ''}}" bindtap="playVoice">
+        <text class="play-icon">{{isPlaying ? '⏸️' : '▶️'}}</text>
+        <text class="play-text">{{isPlaying ? '暂停' : '试听'}}</text>
+      </button>
+      <view class="play-progress" wx:if="{{isPlaying}}">
+        <view class="progress-bar" style="{{playPercentStyle}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 输入区域 -->
+  <view class="input-area">
+    <view class="input-wrapper">
+      <input 
+        class="message-input" 
+        placeholder="输入您的问题..." 
+        bindinput="onInputChange" 
+        value="{{inputMessage}}" 
+        confirm-type="send" 
+        bindconfirm="sendMessage" 
+        maxlength="500" 
+        cursor-spacing="20" 
+      />
+      <view class="input-actions">
+        <button class="voice-btn {{showVoiceInput ? 'active' : ''}}" bindtap="toggleVoiceInput"><text class="voice-icon">🎤</text></button>
+        <button class="send-btn {{inputMessage && inputMessage.trim() && !isLoading ? 'active' : 'disabled'}}" catchtap="sendMessage"><text class="send-icon">📤</text></button>
+      </view>
+    </view>
+    <view class="network-tip" wx:if="{{networkType === 'none'}}">
+      <text class="network-icon">📶</text>
+      <text class="network-text">当前网络不可用</text>
+    </view>
+  </view>
+</view>

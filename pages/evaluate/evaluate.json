@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "满意度评价",
+  "navigationBarBackgroundColor": "#048dfd",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#f5f5f5",
+  "usingComponents": {}
+}

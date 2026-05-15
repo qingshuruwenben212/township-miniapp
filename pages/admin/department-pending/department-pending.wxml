@@ -1,0 +1,89 @@
+<!-- pages/admin/department-pending/department-pending.wxml -->
+<view class="container">
+    <view class="header">
+        <view class="header-title">
+            <text class="title">部门待处理事务</text>
+            <text class="subtitle">AI置信度低于70%需人工复核</text>
+        </view>
+    </view>
+
+    <view class="department-list" wx:if="{{!showDetail}}">
+        <view class="stats-card">
+            <view class="stat-item">
+                <text class="stat-label">总待处理</text>
+                <text class="stat-value">{{totalPendingCount}}</text>
+            </view>
+            <view class="stat-item">
+                <text class="stat-label">需人工复核</text>
+                <text class="stat-value warning">{{totalLowConfidenceCount}}</text>
+            </view>
+        </view>
+        <view class="department-grid">
+            <view class="department-card" wx:for="{{departments}}" wx:key="id" bindtap="viewDepartment" data-id="{{item.id}}">
+                <view class="dept-icon">{{item.icon}}</view>
+                <view class="dept-info">
+                    <text class="dept-name">{{item.name}}</text>
+                    <text class="dept-count" wx:if="{{item.count > 0}}">{{item.count}}条待处理</text>
+                    <text class="dept-count zero" wx:else>暂无待处理</text>
+                </view>
+                <view class="dept-arrow">›</view>
+                <view class="warning-badge" wx:if="{{item.lowConfidenceCount > 0}}">{{item.lowConfidenceCount}}需复核</view>
+            </view>
+        </view>
+    </view>
+
+    <view class="department-detail" wx:else>
+        <view class="detail-header">
+            <view class="back-btn" bindtap="backToList"><text class="back-icon">←</text><text>返回</text></view>
+            <view class="detail-title">
+                <text class="dept-icon">{{currentDepartment.icon}}</text>
+                <text class="dept-name">{{currentDepartment.name}}</text>
+            </view>
+            <view class="filter-tabs">
+                <view class="filter-tab {{filterType === 'all' ? 'active' : ''}}" data-type="all" bindtap="filterFeedbacks">全部({{currentDepartment.pendingList.length}})</view>
+                <view class="filter-tab {{filterType === 'lowConfidence' ? 'active' : ''}}" data-type="lowConfidence" bindtap="filterFeedbacks">需复核({{currentDepartment.lowConfidenceCount}})</view>
+            </view>
+        </view>
+
+        <scroll-view class="feedback-list" scroll-y>
+            <view wx:if="{{currentFeedbacks.length === 0}}" class="empty-state">
+                <text class="empty-icon">📭</text>
+                <text class="empty-text">暂无待处理反馈</text>
+            </view>
+            <block wx:for="{{currentFeedbacks}}" wx:key="id">
+                <view class="feedback-item">
+                    <view class="feedback-content" bindtap="viewFeedbackDetail" data-id="{{item.id}}">
+                        <view class="feedback-header">
+                            <text class="feedback-title">{{item.title}}</text>
+                            <text class="feedback-time">{{item.created_at || '未知时间'}}</text>
+                        </view>
+                        <text class="feedback-desc">{{item.content}}</text>
+                        <view class="feedback-footer">
+                            <view class="confidence-tag {{getConfidenceClass(item.confidence)}}">AI置信度: {{item.confidence}}%</view>
+                            <view class="status-tag" wx:if="{{item.confidence < aiThreshold}}">⚠️ 需人工复核</view>
+                        </view>
+                        <view class="voice-info" wx:if="{{item.voice_url}}">
+                            <view class="voice-preview" catchtap="playVoice" data-url="{{item.voice_url}}" data-id="{{item.id}}">
+                                <text class="voice-icon">🎤</text>
+                                <text class="voice-label">点击播放语音</text>
+                                <text class="voice-duration" wx:if="{{item.voice_duration}}">{{item.voice_duration}}秒</text>
+                            </view>
+                            <view class="voice-text-preview" catchtap="viewVoiceText" data-text="{{item.voice_text || ''}}">
+                                <text class="text-icon">📝</text>
+                                <text class="text-preview">{{item.voice_text_display || ''}}</text>
+                            </view>
+                        </view>
+                    </view>
+                    <view class="action-buttons">
+                        <view class="classify-btn" wx:if="{{item.confidence < aiThreshold}}" catchtap="manualClassify" data-id="{{item.id}}">
+                            <text class="btn-icon">✏️</text><text>人工分类</text>
+                        </view>
+                        <view class="complete-btn" catchtap="markAsCompleted" data-id="{{item.id}}">
+                            <text class="btn-icon">✅</text><text>设为已处理</text>
+                        </view>
+                    </view>
+                </view>
+            </block>
+        </scroll-view>
+    </view>
+</view>

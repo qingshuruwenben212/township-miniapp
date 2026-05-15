@@ -1,0 +1,193 @@
+<!-- pages/feedback/submit/submit.wxml -->
+<view class="container">
+  <!-- 场景提示（适配乡镇用户认知） -->
+  <view class="scene-tip">
+    可反馈问题：农业补贴咨询、宅基地审批、基础设施维修等
+  </view>
+
+  <!-- 提交状态提示 -->
+  <view class="submit-status" wx:if="{{isSubmitting}}">
+    <text class="status-text">正在提交，请稍候...</text>
+  </view>
+
+  <!-- 反馈表单 -->
+  <form bindsubmit="handleFormSubmit" class="feedback-form card">
+    <!-- 所属区域（可点击选择） -->
+    <view class="form-item" bindtap="handleRegionSelect">
+      <view class="form-label">所属区域</view>
+      <view class="form-value {{region && region !== '' ? 'region-selected' : ''}}">
+        {{region || '请选择区域（点击选择）'}}
+      </view>
+    </view>
+
+    <!-- 反馈类型选择（已改为非必填） -->
+    <view class="form-item">
+      <view class="form-label">反馈类型（可选）</view>
+      <view class="type-buttons">
+        <block wx:for="{{feedbackTypes}}" wx:key="id">
+          <button 
+            class="type-btn {{selectedType === item.id ? 'active' : ''}}"
+            bindtap="handleTypeSelect"
+            data-typeid="{{item.id}}"
+          >
+            {{item.name}}
+          </button>
+        </block>
+      </view>
+      
+      <!-- 提示文字：不选择类型将由AI自动分类 -->
+      <view class="type-tip" wx:if="{{!selectedType && !aiRecommendType && !isAnalyzing}}">
+        <text class="tip-icon">💡</text>
+        <text class="tip-text">不选择类型将由AI自动分类</text>
+      </view>
+      
+      <!-- AI智能推荐提示 - 添加条件确保提交后不显示 -->
+      <view class="ai-recommend-box" wx:if="{{aiRecommendType && !isSubmitting}}">
+        <view class="ai-icon">🤖</view>
+        <view class="ai-content">
+          <view class="ai-tip">{{aiRecommendType}}</view>
+          <view class="ai-keywords" wx:if="{{aiMatchedKeywords.length > 0}}">
+            匹配关键词：
+            <block wx:for="{{aiMatchedKeywords}}" wx:key="index">
+              <text class="keyword-tag">{{item}}</text>
+            </block>
+          </view>
+        </view>
+      </view>
+      
+      <!-- AI分析中状态 -->
+      <view class="ai-analyzing" wx:elif="{{isAnalyzing && !isSubmitting}}">
+        <view class="analyzing-icon">🤖</view>
+        <text>AI正在智能分析中...</text>
+      </view>
+    </view>
+
+    <!-- 反馈标题 -->
+    <view class="form-item">
+      <view class="form-label">反馈标题</view>
+      <input 
+        class="form-input" 
+        name="title" 
+        placeholder="请简要描述（如：XX村路灯损坏）" 
+        bindinput="handleTitleInput"
+        value="{{title}}"
+        maxlength="50"
+      />
+    </view>
+
+    <!-- 反馈详情 -->
+    <view class="form-item">
+      <view class="form-label">反馈详情</view>
+      <textarea 
+        class="form-textarea" 
+        name="content" 
+        placeholder="请详细说明问题（如：位置、需求、联系方式）" 
+        bindinput="handleContentInput"
+        value="{{content}}"
+        maxlength="500"
+        auto-height
+      ></textarea>
+      <view class="word-count">{{content.length}}/500</view>
+    </view>
+
+    <!-- 多模态附件上传 -->
+    <view class="form-item">
+      <view class="form-label">附件上传（可选）</view>
+      <view class="upload-buttons">
+        <button class="upload-btn" bindtap="handleChooseImage" disabled="{{isSubmitting}}">
+          <text class="btn-icon">📷</text>
+          选择图片
+        </button>
+        <button class="upload-btn" bindtap="handleRecordVoice" disabled="{{isSubmitting}}">
+          <text class="btn-icon">{{isRecording ? '⏹️' : '🎤'}}</text>
+          {{isRecording ? '录音中...' : '语音反馈'}}
+        </button>
+      </view>
+
+      <!-- 已上传图片预览 -->
+      <view class="image-preview" wx:if="{{imageList.length > 0}}">
+        <block wx:for="{{imageList}}" wx:key="index">
+          <view class="preview-item">
+            <image src="{{item}}" class="preview-img" mode="aspectFill"></image>
+            <view class="delete-btn" bindtap="handleDeleteImage" data-index="{{index}}">✕</view>
+          </view>
+        </block>
+      </view>
+
+      <!-- 已上传语音展示 - 修复路径字段名 -->
+      <view class="voice-preview" wx:if="{{voiceInfo.localPath || voiceInfo.url}}">
+        <view class="voice-info">
+          <view class="voice-name">
+            <text class="voice-icon">🎤</text>
+            <text>语音反馈</text>
+            <text class="voice-duration" wx:if="{{voiceInfo.duration > 0}}">{{voiceInfo.duration}}秒</text>
+          </view>
+          <view class="voice-controls">
+            <button class="play-btn" bindtap="handlePlayVoice" wx:if="{{voiceInfo.localPath || voiceInfo.url}}">
+              {{isPlaying ? '暂停' : '试听'}}
+            </button>
+          </view>
+        </view>
+        <!-- 语音转写文本显示 -->
+        <view class="voice-text" wx:if="{{voiceInfo.text}}">
+          <text class="text-label">转写：</text>
+          <text class="text-content">{{voiceInfo.text}}</text>
+        </view>
+        <view class="delete-text" bindtap="handleDeleteVoice">删除</view>
+      </view>
+
+      <!-- 语音识别状态 -->
+      <view class="voice-status" wx:if="{{recognizing}}">
+        <text class="status-icon">🔄</text>
+        <text>语音识别中...</text>
+      </view>
+      <view class="voice-status error" wx:if="{{recognizeError}}">
+        <text class="status-icon">❌</text>
+        <text>{{recognizeError}}</text>
+        <button class="retry-btn" bindtap="retryRecognize" size="mini">重试</button>
+      </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <button 
+      class="btn-primary" 
+      form-type="submit"
+      disabled="{{!title || !content || !region || isSubmitting}}"
+    >
+      {{isSubmitting ? '提交中...' : '提交反馈'}}
+    </button>
+  </form>
+
+  <!-- 语音输入面板（悬浮） -->
+  <view class="voice-panel" wx:if="{{showVoiceInput && !isSubmitting}}">
+    <view class="voice-mask" bindtap="cancelRecording"></view>
+    <view class="voice-content">
+      <view class="voice-header">
+        <text class="panel-title">语音输入</text>
+        <text class="panel-close" bindtap="cancelRecording">✕</text>
+      </view>
+      
+      <!-- 录音状态 -->
+      <view class="recording-status" wx:if="{{isRecording}}">
+        <view class="recording-animation">
+          <view class="wave"></view>
+          <view class="wave"></view>
+          <view class="wave"></view>
+          <view class="wave"></view>
+        </view>
+        <text class="recording-time">{{formattedRecordingTime}}</text>
+      </view>
+      
+      <!-- 录音按钮 -->
+      <view class="record-btn-wrapper">
+        <view class="record-btn {{isRecording ? 'recording' : ''}}" 
+              bindtouchstart="startRecord" 
+              bindtouchend="stopRecord"
+              bindtouchcancel="stopRecord">
+          <text class="record-icon">{{isRecording ? '⏹️' : '🎤'}}</text>
+        </view>
+        <text class="record-tip">{{isRecording ? '松开结束' : '按住说话'}}</text>
+      </view>
+    </view>
+  </view>
+</view>

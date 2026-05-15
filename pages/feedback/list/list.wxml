@@ -1,0 +1,120 @@
+<!-- pages/feedback/list/list.wxml -->
+<view class="container">
+  <!-- 筛选栏 - 添加已评分选项 -->
+  <view class="filter-bar">
+    <view 
+      class="filter-item {{currentFilter === 'all' ? 'active' : ''}}"
+      data-type="all"
+      bindtap="handleFilter"
+    >
+      全部
+    </view>
+    <view 
+      class="filter-item {{currentFilter === 'processing' ? 'active' : ''}}"
+      data-type="processing"
+      bindtap="handleFilter"
+    >
+      处理中
+    </view>
+    <view 
+      class="filter-item {{currentFilter === 'done' ? 'active' : ''}}"
+      data-type="done"
+      bindtap="handleFilter"
+    >
+      已完成
+    </view>
+    <!-- 新增已评分分类 -->
+    <view 
+      class="filter-item {{currentFilter === 'evaluated' ? 'active' : ''}}"
+      data-type="evaluated"
+      bindtap="handleFilter"
+    >
+      已评分
+    </view>
+  </view>
+
+  <!-- 列表区域 -->
+  <scroll-view 
+    class="list-scroll" 
+    scroll-y 
+    enhanced
+    show-scrollbar="{{false}}"
+    bindscrolltolower="loadMore"
+    lower-threshold="100"
+  >
+    <!-- 加载状态 -->
+    <view class="loading-state" wx:if="{{isLoading && feedbackList.length === 0}}">
+      <text>加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:elif="{{feedbackList.length === 0}}">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">暂无反馈记录</text>
+      <button class="submit-btn" bindtap="goToSubmitPage">提交反馈</button>
+    </view>
+
+    <!-- 反馈列表 -->
+    <block wx:for="{{feedbackList}}" wx:key="id">
+      <view class="feedback-item">
+        <!-- 主内容区，点击查看详情 -->
+        <view class="feedback-content" bindtap="goToDetail" data-id="{{item.id}}">
+          <view class="feedback-header">
+            <text class="feedback-title">{{item.title}}</text>
+            <text class="feedback-time">{{item.createTime}}</text>
+          </view>
+          <view class="feedback-body">
+            <text class="feedback-text">{{item.content}}</text>
+          </view>
+          <view class="feedback-footer">
+            <!-- 状态标签，根据状态显示不同样式 -->
+            <text class="feedback-status {{'status-' + (item.statusValue || 'pending')}}">{{item.status}}</text>
+            
+            <!-- 评分显示（如果是已评分状态）- 使用预生成的 ratingStars 字段 -->
+            <view class="rating-badge" wx:if="{{item.hasEvaluated || item.statusValue === 'archived'}}">
+              <text class="rating-stars">{{item.ratingStars}}</text>
+            </view>
+            
+            <!-- AI处理中特殊标记 -->
+            <view class="ai-badge" wx:elif="{{item.status === 'AI处理中' || item.statusValue === 'pending_ai'}}">
+              <text class="ai-icon">🤖</text>
+              <text class="ai-text">AI分析中</text>
+            </view>
+            
+            <view class="feedback-tags">
+              <text class="tag" wx:if="{{item.imageCount > 0}}">📷 {{item.imageCount}}</text>
+              <text class="tag" wx:if="{{item.hasVoice}}">🎤 语音</text>
+            </view>
+            <text class="feedback-dept">{{item.departmentName}}</text>
+          </view>
+          
+          <!-- AI关键词标签（如果有） -->
+          <view class="ai-keywords" wx:if="{{item.aiTags && item.aiTags.length > 0}}">
+            <block wx:for="{{item.aiTags}}" wx:key="index">
+              <text class="keyword-tag" wx:if="{{index < 3}}">{{item}}</text>
+            </block>
+            <text class="keyword-more" wx:if="{{item.aiTags.length > 3}}">+{{item.aiTags.length - 3}}</text>
+          </view>
+        </view>
+
+        <!-- 删除按钮 -->
+        <view class="delete-btn" bindtap="deleteFeedback" data-id="{{item.id}}">
+          <text class="delete-icon">🗑️</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- 加载更多提示 -->
+    <view class="load-more" wx:if="{{hasMore && feedbackList.length > 0}}">
+      <text>加载更多...</text>
+    </view>
+    <view class="no-more" wx:elif="{{!hasMore && feedbackList.length > 0}}">
+      <text>没有更多了</text>
+    </view>
+  </scroll-view>
+
+  <!-- 悬浮提交按钮 -->
+  <view class="float-btn" bindtap="goToSubmitPage">
+    <text class="float-btn-icon">+</text>
+  </view>
+</view>

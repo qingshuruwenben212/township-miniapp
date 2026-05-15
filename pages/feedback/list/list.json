@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "反馈记录",
+  "navigationBarBackgroundColor": "#048dfd",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#f5f5f5",
+  "usingComponents": {}
+}

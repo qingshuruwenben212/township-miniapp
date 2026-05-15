@@ -1,0 +1,23 @@
+{
+  "desc": "小程序索引配置，控制页面是否被微信索引",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "pages/index/index",
+      "params": ["*"],
+      "matching": "exact"
+    },
+    {
+      "action": "allow",
+      "page": "pages/feedback/submit/submit",
+      "params": ["*"],
+      "matching": "exact"
+    },
+    {
+      "action": "disallow",
+      "page": "pages/login/login",
+      "params": ["*"],
+      "matching": "exact"
+    }
+  ]
+}

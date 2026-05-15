@@ -1,0 +1,146 @@
+<!-- pages/evaluate/evaluate.wxml -->
+<view class="container">
+
+  <!-- 统计卡片 -->
+  <view class="stat-card">
+    <view class="stat-item">
+      <text class="stat-number">{{totalCount}}</text>
+      <text class="stat-label">已完成事务</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-number">{{evaluatedCount}}</text>
+      <text class="stat-label">已评价</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-number">{{pendingEvaluateCount}}</text>
+      <text class="stat-label">待评价</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{isLoading && completedFeedbacks.length === 0}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:elif="{{completedFeedbacks.length === 0}}">
+    <text class="empty-icon">📭</text>
+    <text class="empty-text">暂无已完成的事务</text>
+    <button class="refresh-btn" bindtap="handleRefresh">刷新</button>
+  </view>
+
+  <!-- 已完成事务列表 -->
+  <scroll-view 
+    class="feedback-list" 
+    scroll-y 
+    enhanced
+    show-scrollbar="{{false}}"
+    bindscrolltolower="loadMore"
+    lower-threshold="100"
+    wx:else
+  >
+    <block wx:for="{{completedFeedbacks}}" wx:key="id" wx:for-item="item">
+      <view class="feedback-item {{item.hasEvaluated ? 'evaluated' : ''}}">
+        <!-- 反馈内容区域 -->
+        <view class="feedback-content" bindtap="viewFeedbackDetail" data-id="{{item.id}}">
+          <view class="feedback-header">
+            <text class="feedback-title">{{item.title}}</text>
+            <text class="feedback-time">{{item.createTime}}</text>
+          </view>
+          
+          <view class="feedback-body">
+            <text class="feedback-text">{{item.content}}</text>
+          </view>
+          
+          <view class="feedback-meta">
+            <text class="meta-label">处理部门：</text>
+            <text class="meta-value">{{item.deptName}}</text>
+          </view>
+          
+          <view class="feedback-meta">
+            <text class="meta-label">完成时间：</text>
+            <text class="meta-value">{{item.completeTime}}</text>
+          </view>
+          
+          <!-- 已评价显示 -->
+          <view class="evaluated-info" wx:if="{{item.hasEvaluated}}">
+            <view class="rating-display">
+              <block wx:for="{{[1,2,3,4,5]}}" wx:key="*this" wx:for-item="star">
+                <text class="star {{item.rating >= star ? 'active' : ''}}">★</text>
+              </block>
+              <text class="rating-text">{{item.rating}}分</text>
+            </view>
+            <text class="comment-text" wx:if="{{item.comment}}">评价：{{item.comment}}</text>
+          </view>
+        </view>
+
+        <!-- 评价按钮 -->
+        <view class="evaluate-btn" bindtap="openEvaluateModal" data-feedback="{{item}}">
+          <text class="btn-text">{{item.hasEvaluated ? '已评价' : '去评价'}}</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- 加载更多提示 -->
+    <view class="load-more" wx:if="{{hasMore && completedFeedbacks.length > 0}}">
+      <text>加载更多...</text>
+    </view>
+    <view class="no-more" wx:elif="{{!hasMore && completedFeedbacks.length > 0}}">
+      <text>没有更多了</text>
+    </view>
+  </scroll-view>
+
+  <!-- 评价弹窗 -->
+  <view class="modal-mask" wx:if="{{showEvaluateModal}}" bindtap="closeEvaluateModal"></view>
+  <view class="modal-content" wx:if="{{showEvaluateModal}}">
+    <view class="modal-header">
+      <text class="modal-title">满意度评价</text>
+      <text class="modal-close" bindtap="closeEvaluateModal">✕</text>
+    </view>
+    
+    <view class="modal-body">
+      <view class="feedback-info" wx:if="{{currentFeedback}}">
+        <text class="info-title">{{currentFeedback.title}}</text>
+        <text class="info-content">{{currentFeedback.content}}</text>
+      </view>
+      
+      <view class="rating-section">
+        <text class="rating-label">请打分：</text>
+        <view class="rating-stars">
+          <block wx:for="{{[1,2,3,4,5]}}" wx:key="*this" wx:for-item="star">
+            <text class="star {{rating >= star ? 'active' : ''}}" 
+                  bindtap="selectRating" 
+                  data-rating="{{star}}">★</text>
+          </block>
+        </view>
+        <text class="rating-text">
+          <block wx:if="{{rating === 1}}">非常不满意</block>
+          <block wx:elif="{{rating === 2}}">不满意</block>
+          <block wx:elif="{{rating === 3}}">一般</block>
+          <block wx:elif="{{rating === 4}}">满意</block>
+          <block wx:elif="{{rating === 5}}">非常满意</block>
+          <block wx:else>请选择评分</block>
+        </text>
+      </view>
+      
+      <view class="comment-section">
+        <text class="comment-label">评价内容（选填）：</text>
+        <textarea 
+          class="comment-input" 
+          placeholder="请输入您的评价内容..." 
+          bindinput="onCommentInput"
+          value="{{comment}}"
+          maxlength="200"
+        ></textarea>
+        <view class="word-count">{{comment.length}}/200</view>
+      </view>
+    </view>
+    
+    <view class="modal-footer">
+      <button class="modal-btn cancel" bindtap="closeEvaluateModal">取消</button>
+      <button class="modal-btn confirm" bindtap="submitEvaluation" disabled="{{isSubmitting}}">
+        {{isSubmitting ? '提交中...' : '提交评价'}}
+      </button>
+    </view>
+  </view>
+</view>

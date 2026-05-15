@@ -1,0 +1,158 @@
+<!-- pages/index/index.wxml -->
+<view class="container">
+    <!-- 用户欢迎卡片 -->
+    <view class="user-card card" wx:if="{{isLogin && userInfo}}">
+        <view class="user-info-row">
+            <view class="user-welcome">
+                <text class="welcome-text">您好，</text>
+                <text class="user-name">{{userInfo.name || userInfo.real_name || userInfo.username || '用户'}}</text>
+            </view>
+
+            <!-- 村民专用消息入口 -->
+            <view class="message-entry" wx:if="{{userInfo.user_type === 'villager'}}" bindtap="goToMessage">
+                <view class="message-badge" wx:if="{{unreadCount > 0}}">
+                    <text>{{unreadCount > 99 ? '99+' : unreadCount}}</text>
+                </view>
+                <text class="message-icon-text">📩</text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 未登录状态显示 -->
+    <view class="user-card card" wx:else>
+        <view class="user-info-row">
+            <view class="user-welcome">
+                <text class="welcome-text">您好，请</text>
+                <text class="login-link" bindtap="goToLogin">登录</text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 管理员快捷入口（仅管理员可见） -->
+    <view class="admin-card card" wx:if="{{isAdmin}}">
+        <view class="section-title">
+            <text>📋 管理入口</text>
+            <text class="section-subtitle">待处理事务</text>
+        </view>
+        <view class="admin-grid">
+            <view class="admin-item" bindtap="goToPendingUsers">
+                <view class="admin-icon-wrapper">
+                    <text class="admin-icon-text">👥</text>
+                    <view class="admin-badge" wx:if="{{pendingUserCount > 0}}">{{pendingUserCount}}</view>
+                </view>
+                <view class="admin-text">待审核用户</view>
+            </view>
+
+            <!-- 部门待处理入口 -->
+            <view class="admin-item" bindtap="goToDepartmentPending">
+                <view class="admin-icon-wrapper">
+                    <text class="admin-icon-text">🏢</text>
+                    <view class="admin-badge" wx:if="{{departmentPendingCount > 0}}">{{departmentPendingCount}}</view>
+                </view>
+                <view class="admin-text">部门待处理</view>
+            </view>
+
+            <view class="admin-item" bindtap="goToPendingFeedbacks">
+                <view class="admin-icon-wrapper">
+                    <text class="admin-icon-text">📋</text>
+                    <view class="admin-badge" wx:if="{{pendingFeedbackCount > 0}}">{{pendingFeedbackCount}}</view>
+                </view>
+                <view class="admin-text">待分类反馈</view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 乡镇公告 -->
+    <view class="notice-card card">
+        <view class="notice-title">
+            <text class="notice-icon-text">📢</text>
+            <view class="title-text">乡镇公告</view>
+            <view class="more-link" bindtap="viewAllNotices">更多</view>
+        </view>
+        <view class="notice-content" bindtap="goToNoticeDetail" data-index="0">
+            {{noticeList.length > 0 ? noticeList[0].title : '暂无最新公告'}}
+        </view>
+        <view class="notice-time" wx:if="{{noticeList.length > 0}}">
+            {{noticeList[0].date}}
+        </view>
+    </view>
+
+    <!-- 核心服务入口 - 需要登录才能显示 -->
+    <view class="service-card card" wx:if="{{isLogin}}">
+        <view class="section-title">
+            <text>⚡ 反馈服务</text>
+            <text class="section-subtitle">快速提交、实时查询</text>
+        </view>
+        <view class="service-grid">
+            <view class="service-item" bindtap="goToSubmitFeedback">
+                <text class="service-icon-text">📝</text>
+                <view class="item-text">提交反馈</view>
+            </view>
+            <view class="service-item" bindtap="goToFeedbackList">
+                <text class="service-icon-text">🔍</text>
+                <view class="item-text">进度查询</view>
+            </view>
+            <view class="service-item" bindtap="goToEvaluate">
+                <text class="service-icon-text">⭐</text>
+                <view class="item-text">满意度评价</view>
+            </view>
+            <view class="service-item" bindtap="goToAiConsult">
+                <text class="service-icon-text">🤖</text>
+                <view class="item-text">AI智能助手</view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 反馈处理数据 - 仅管理员登录后显示 -->
+    <view class="data-card card" wx:if="{{isLogin && isAdmin}}">
+        <view class="section-title">
+            <text>📊 反馈处理概况</text>
+            <text class="section-subtitle">实时数据统计</text>
+        </view>
+        <view class="data-grid">
+            <view class="data-item">
+                <view class="data-num">{{totalFeedback}}</view>
+                <view class="data-text">总反馈数</view>
+            </view>
+            <view class="data-item">
+                <view class="data-num">{{pendingTotal}}</view>
+                <view class="data-text">待处理</view>
+            </view>
+            <view class="data-item">
+                <view class="data-num">{{processingFeedback}}</view>
+                <view class="data-text">处理中</view>
+            </view>
+            <view class="data-item">
+                <view class="data-num">{{pendingEvaluate}}</view>
+                <view class="data-text">待评价</view>
+            </view>
+            <view class="data-item">
+                <view class="data-num">{{evaluated}}</view>
+                <view class="data-text">已评价</view>
+            </view>
+            <view class="data-item">
+                <view class="data-num">{{satisfactionRate}}%</view>
+                <view class="data-text">满意度</view>
+            </view>
+        </view>
+        <!-- 进度条：显示已完成占比 -->
+        <view class="progress-section" wx:if="{{totalFeedback > 0}}">
+            <view class="progress-label">
+                <text>已完成进度</text>
+                <text>{{completedTotal}} / {{totalFeedback}}</text>
+            </view>
+            <view class="progress-bar-bg">
+              <view class="progress-bar-fill" style="width: {{progressWidth + '%'}}"></view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 底部刷新按钮 -->
+    <view class="footer">
+        <view class="refresh-btn" bindtap="handleRefresh">
+            <text class="refresh-icon-text">🔄</text>
+            <text>刷新数据</text>
+        </view>
+        <view class="copyright">© 2026 乡镇服务反馈平台</view>
+    </view>
+</view>

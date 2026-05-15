@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "待审核用户",
+  "navigationBarBackgroundColor": "#048dfd",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#f5f5f5"
+}

@@ -1,0 +1,8 @@
+# 依赖（如果以后引入 npm）
+node_modules/
+
+# 开发工具
+**/.idea/
+*.log
+.DS_Store
+Thumbs.db

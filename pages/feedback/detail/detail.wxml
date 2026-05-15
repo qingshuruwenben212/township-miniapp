@@ -1,0 +1,168 @@
+<!-- pages/feedback/detail/detail.wxml -->
+<view class="container">
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{isLoading}}">
+    <view class="loading-icon">🤖</view>
+    <text>加载中...</text>
+  </view>
+
+  <!-- 详情内容 -->
+  <view class="detail-card" wx:else>
+    <!-- 状态标签 -->
+    <view class="status-bar">
+      <view class="status-tag status-{{feedbackDetail.status === 'completed' ? 'done' : (feedbackDetail.status === 'processing' ? 'processing' : 'pending')}}">
+      {{feedbackDetail.status_display || (feedbackDetail.status ===    'archived' ? '已评分' : feedbackDetail.status) || '待处理'}}
+      </view>
+      <view class="feedback-id">ID: {{feedbackId}}</view>
+    </view>
+
+    <!-- 标题 -->
+    <view class="detail-title">{{feedbackDetail.title}}</view>
+
+    <!-- 元信息 -->
+    <view class="meta-info">
+      <view class="meta-item">
+        <text class="meta-label">提交时间：</text>
+        <text class="meta-value">{{feedbackDetail.createTime || feedbackDetail.submitTime}}</text>
+      </view>
+      <view class="meta-item">
+        <text class="meta-label">处理部门：</text>
+        <text class="meta-value dept-name">{{feedbackDetail.departmentName || feedbackDetail.dept_name || '待派单'}}</text>
+      </view>
+      <view class="meta-item" wx:if="{{feedbackDetail.typeName}}">
+        <text class="meta-label">反馈类型：</text>
+        <text class="meta-value">{{feedbackDetail.typeName}}</text>
+      </view>
+      <view class="meta-item" wx:if="{{feedbackDetail.region}}">
+        <text class="meta-label">所属区域：</text>
+        <text class="meta-value">{{feedbackDetail.region}}</text>
+      </view>
+    </view>
+
+    <!-- AI分析结果卡片 -->
+    <view class="ai-analysis-card" wx:if="{{feedbackDetail.hasAIAnalysis || (feedbackDetail.aiTags && feedbackDetail.aiTags.length > 0) || feedbackDetail.aiConfidence > 0}}">
+      <view class="ai-card-header">
+        <text class="ai-icon">🤖</text>
+        <text class="ai-title">AI智能分析</text>
+      </view>
+      <view class="ai-card-content">
+        <!-- 匹配度显示 -->
+        <view class="ai-confidence" wx:if="{{feedbackDetail.aiConfidence > 0}}">
+          <text class="confidence-label">匹配度：</text>
+          <text class="confidence-value">{{feedbackDetail.aiConfidence}}%</text>
+          <view class="confidence-bar">
+            <view class="confidence-progress" style="width:{{feedbackDetail.aiConfidence + '%'}}"></view>
+          </view>
+        </view>
+        
+        <!-- 关键词显示 -->
+        <view class="ai-tags" wx:if="{{feedbackDetail.aiTags && feedbackDetail.aiTags.length > 0}}">
+          <text class="tags-label">关键词：</text>
+          <view class="tags-list">
+            <text class="tag-item" wx:for="{{feedbackDetail.aiTags}}" wx:key="index">{{item}}</text>
+          </view>
+        </view>
+        
+        <!-- AI推荐部门 -->
+        <view class="ai-recommend" wx:if="{{feedbackDetail.aiAnalysisLabel || feedbackDetail.aiRecommendedDept}}">
+          <text class="recommend-label">AI建议：</text>
+          <text class="recommend-value">
+            {{feedbackDetail.aiAnalysisLabel || 
+              (feedbackDetail.aiRecommendedDept === 'agriculture' ? '农业服务部' :
+               feedbackDetail.aiRecommendedDept === 'infrastructure' ? '基建维修部' :
+               feedbackDetail.aiRecommendedDept === 'environment' ? '环境整治部' :
+               feedbackDetail.aiRecommendedDept === 'health' ? '医疗卫生部' :
+               feedbackDetail.aiRecommendedDept === 'civil' ? '民政服务部' :
+               feedbackDetail.aiRecommendedDept === 'general' ? '综合服务部' : '')}}
+          </text>
+        </view>
+        
+        <!-- 如果只有置信度没有标签，显示简单信息 -->
+        <view class="ai-simple" wx:elif="{{feedbackDetail.aiConfidence > 0 && (!feedbackDetail.aiTags || feedbackDetail.aiTags.length === 0)}}">
+          <text class="simple-text">AI已分析，匹配度 {{feedbackDetail.aiConfidence}}%</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 反馈内容 -->
+    <view class="content-section">
+      <view class="section-title">反馈内容</view>
+      <view class="content-text">{{feedbackDetail.content}}</view>
+    </view>
+
+    <!-- 图片附件 -->
+    <view class="attachment-section" wx:if="{{feedbackDetail.imageCount > 0 || (feedbackDetail.imageUrls && feedbackDetail.imageUrls.length > 0) || (feedbackDetail.images && feedbackDetail.images.length > 0)}}">
+      <view class="section-title">图片附件（
+        {{feedbackDetail.imageCount > 0 ? feedbackDetail.imageCount : 
+          (feedbackDetail.imageUrls ? feedbackDetail.imageUrls.length : 
+           (feedbackDetail.images ? feedbackDetail.images.length : 0))}}
+      张）</view>
+      <view class="image-list" wx:if="{{feedbackDetail.imageUrls && feedbackDetail.imageUrls.length > 0}}">
+        <block wx:for="{{feedbackDetail.imageUrls}}" wx:key="index">
+          <image class="attachment-image" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"></image>
+        </block>
+      </view>
+      <view class="image-list" wx:elif="{{feedbackDetail.images && feedbackDetail.images.length > 0}}">
+        <block wx:for="{{feedbackDetail.images}}" wx:key="index">
+          <image class="attachment-image" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"></image>
+        </block>
+      </view>
+    </view>
+
+    <!-- 语音附件 -->
+    <view class="attachment-section" wx:if="{{feedbackDetail.hasVoice || (feedbackDetail.voiceUrl && feedbackDetail.voiceUrl.length > 0) || (feedbackDetail.voice_url && feedbackDetail.voice_url.length > 0)}}">
+      <view class="section-title">语音附件</view>
+      <view class="voice-preview">
+        <view class="voice-info">
+          <text class="voice-icon">🎤</text>
+          <text class="voice-name">村民语音反馈</text>
+          <text class="voice-duration" wx:if="{{feedbackDetail.voiceDuration || feedbackDetail.voice_duration}}">{{feedbackDetail.voiceDuration || feedbackDetail.voice_duration}}秒</text>
+        </view>
+        <view class="voice-controls">
+          <button class="play-btn {{isPlaying ? 'playing' : ''}}" bindtap="playVoice">
+            <text class="btn-icon">{{isPlaying ? '⏸️' : '▶️'}}</text>
+            <text>{{isPlaying ? '暂停' : '播放'}}</text>
+          </button>
+        </view>
+      </view>
+      <!-- 语音转写文本：纵向布局，高度限制，超出省略 -->
+      <view class="voice-transcript" wx:if="{{feedbackDetail.voiceText || feedbackDetail.voice_text}}" bindtap="viewVoiceText">
+        <text class="transcript-icon">📝</text>
+        <view class="transcript-body">
+          <text class="transcript-label">语音转写：</text>
+          <text class="transcript-text">{{feedbackDetail.voiceText || feedbackDetail.voice_text}}</text>
+        </view>
+        <text class="view-more">查看详情</text>
+      </view>
+    </view>
+
+    <!-- 处理信息 -->
+    <view class="process-info" wx:if="{{feedbackDetail.processed_at}}">
+      <view class="section-title">处理信息</view>
+      <view class="meta-item">
+        <text class="meta-label">处理时间：</text>
+        <text class="meta-value">{{feedbackDetail.processed_at}}</text>
+      </view>
+      <view class="meta-item" wx:if="{{feedbackDetail.reject_reason}}">
+        <text class="meta-label">驳回原因：</text>
+        <text class="meta-value reject-reason">{{feedbackDetail.reject_reason}}</text>
+      </view>
+      <view class="meta-item" wx:if="{{feedbackDetail.rating}}">
+        <text class="meta-label">满意度评分：</text>
+        <text class="meta-value rating">{{feedbackDetail.rating}}星</text>
+      </view>
+      <view class="meta-item" wx:if="{{feedbackDetail.comment}}">
+        <text class="meta-label">用户评价：</text>
+        <text class="meta-value">{{feedbackDetail.comment}}</text>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button class="action-btn copy-btn" bindtap="copyContent">复制内容</button>
+      <button class="action-btn delete-btn" bindtap="handleDelete">删除反馈</button>
+      <button class="action-btn resubmit-btn" bindtap="handleResubmit" wx:if="{{feedbackDetail.status === 'pending_manual' || feedbackDetail.status === 'rejected'}}">重新提交</button>
+      <button class="action-btn phone-btn" bindtap="makePhoneCall" wx:if="{{feedbackDetail.user && feedbackDetail.user.phone}}">联系村民</button>
+    </view>
+  </view>
+</view>

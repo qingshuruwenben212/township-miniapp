@@ -1,0 +1,228 @@
+<!-- pages/admin/pending-feedbacks/pending-feedbacks.wxml -->
+<view class="container">
+  <!-- 顶部统计卡片 -->
+  <view class="stats-header">
+    <view class="stats-card">
+      <view class="stat-item">
+        <text class="stat-label">待分类反馈</text>
+        <text class="stat-value">{{pendingFeedbacks.length}}</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-label">今日新增</text>
+        <text class="stat-value warning">{{todayCount}}</text>
+      </view>
+    </view>
+    
+    <!-- 筛选栏 -->
+    <view class="filter-bar">
+      <view class="search-box">
+        <text class="search-icon">🔍</text>
+        <input 
+          class="search-input" 
+          placeholder="搜索标题或内容" 
+          placeholder-class="placeholder"
+          bindinput="onSearchInput"
+        />
+      </view>
+      <view class="sort-btn" bindtap="toggleSort">
+        <text class="sort-icon">⏱️</text>
+        <text class="sort-text">{{sortText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 反馈列表 -->
+  <scroll-view 
+    class="feedback-list" 
+    scroll-y 
+    enhanced
+    show-scrollbar="{{false}}"
+    bindscrolltolower="loadMore"
+    lower-threshold="100"
+  >
+    <!-- 加载状态 -->
+    <view class="loading-state" wx:if="{{isLoading && pendingFeedbacks.length === 0}}">
+      <view class="loading-animation">
+        <view class="dot"></view>
+        <view class="dot"></view>
+        <view class="dot"></view>
+      </view>
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:elif="{{pendingFeedbacks.length === 0}}" class="empty-state">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">暂无待分类反馈</text>
+      <text class="empty-tip">所有反馈都已处理完成</text>
+    </view>
+
+    <!-- 反馈卡片列表 -->
+    <block wx:for="{{pendingFeedbacks}}" wx:key="id" wx:for-index="index" wx:for-item="feedback">
+      <view class="feedback-card" id="card-{{feedback.id}}">
+        <!-- 卡片头部 -->
+        <view class="card-header">
+          <view class="user-info">
+            <view class="user-avatar">
+              <text class="avatar-text">{{feedback.user && feedback.user.real_name ? feedback.user.real_name.charAt(0) : '?'}}</text>
+            </view>
+            <view class="user-detail">
+              <text class="user-name">{{feedback.user ? feedback.user.real_name || '匿名用户' : '匿名用户'}}</text>
+              <text class="user-phone">{{feedback.user ? feedback.user.phone || '无联系方式' : '无联系方式'}}</text>
+            </view>
+          </view>
+          <view class="time-tag">
+            <text class="time-icon">🕐</text>
+            <text class="time-text">{{feedback.displayTime || formatTime(feedback.created_at)}}</text>
+          </view>
+        </view>
+
+        <!-- 反馈内容 -->
+        <view class="content-section">
+          <text class="content-title">{{feedback.title}}</text>
+          <text class="content-desc">{{feedback.content}}</text>
+        </view>
+
+        <!-- AI分析结果 -->
+        <view class="ai-analysis" wx:if="{{feedback.ai_tags || feedback.ai_confidence}}">
+          <view class="analysis-header">
+            <text class="analysis-title">🤖 AI分析结果</text>
+            <view class="confidence-tag {{feedback.confidenceClass}}">
+              <text class="confidence-text">匹配度 {{feedback.confidencePercent}}%</text>
+            </view>
+          </view>
+          
+          <!-- AI推荐部门 -->
+          <view class="analysis-tags">
+            <block wx:if="{{feedback.ai_tags && feedback.ai_tags.length > 0}}">
+              <text class="analysis-tag" wx:for="{{feedback.ai_tags}}" wx:key="index">#{{item}}</text>
+            </block>
+            <block wx:elif="{{feedback.category}}">
+              <text class="analysis-tag">#{{feedback.category === 'agriculture' ? '农业服务' : 
+                feedback.category === 'infrastructure' ? '基建维修' : 
+                feedback.category === 'environment' ? '环境卫生' : 
+                feedback.category === 'health' ? '医疗卫生' : 
+                feedback.category === 'civil' ? '民政咨询' : '综合服务'}}</text>
+            </block>
+            <block wx:else>
+              <text class="analysis-tag">#综合服务</text>
+            </block>
+          </view>
+          
+          <!-- AI置信度阈值提示 -->
+          <view class="ai-warning" wx:if="{{feedback.needManual}}">
+            <text class="warning-icon">⚠️</text>
+            <text class="warning-text">置信度低于{{aiThreshold*100}}%，建议人工复核</text>
+          </view>
+        </view>
+
+        <!-- 用户位置信息 -->
+        <view class="location-section" wx:if="{{feedback.user && feedback.user.address}}">
+          <text class="location-icon">📍</text>
+          <text class="location-text">{{feedback.user.address}}</text>
+        </view>
+
+        <!-- 附件预览 -->
+        <view class="attachments-section" wx:if="{{feedback.images || feedback.voice_url}}">
+          <!-- 图片区域 -->
+          <scroll-view class="images-scroll" scroll-x wx:if="{{feedback.images && feedback.images.length > 0}}">
+            <view class="image-list">
+              <view class="image-item" wx:for="{{feedback.images}}" wx:key="index" bindtap="previewImage" data-url="{{item}}">
+                <image class="preview-img" src="{{item}}" mode="aspectFill"></image>
+              </view>
+            </view>
+          </scroll-view>
+          
+          <!-- 语音区域 -->
+          <view class="voice-section" wx:if="{{feedback.voice_url}}">
+            <view class="voice-player {{feedback.isPlaying ? 'playing' : ''}}" bindtap="playVoice" data-url="{{feedback.voice_url}}" data-id="{{feedback.id}}">
+              <view class="voice-info">
+                <text class="voice-text">村民语音反馈</text>
+                <text class="voice-duration" wx:if="{{feedback.voice_duration}}">{{feedback.voice_duration}}秒</text>
+              </view>
+              <text class="voice-play">{{feedback.isPlaying ? '⏸️' : '▶️'}}</text>
+            </view>
+            
+            <!-- 语音转写文本 - 显示识别结果 -->
+            <view class="voice-transcript" wx:if="{{feedback.voice_text && feedback.voice_text.length > 0}}" bindtap="viewVoiceText" data-text="{{feedback.voice_text}}">
+              <view class="transcript-header">
+                <text class="transcript-icon">📝</text>
+                <text class="transcript-label">语音转写结果：</text>
+              </view>
+              <text class="transcript-content">{{feedback.voice_text.length > 50 ? feedback.voice_text.substr(0, 50) + '...' : feedback.voice_text}}</text>
+              <text class="view-more">查看详情</text>
+            </view>
+            
+            <!-- 无转写文本提示 -->
+            <view class="voice-no-transcript" wx:elif="{{feedback.voice_url && !feedback.voice_text}}">
+              <text class="no-transcript-icon">⏳</text>
+              <text class="no-transcript-text">语音识别中，请稍后...</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 分类操作区 -->
+        <view class="action-section">
+          <text class="action-label">选择分类：</text>
+          
+          <scroll-view class="category-scroll" scroll-x show-scrollbar="{{false}}">
+            <view class="category-list">
+              <view 
+                class="category-item {{feedback.selectedCategory === category.name ? 'selected' : ''}}"
+                wx:for="{{categories}}" 
+                wx:key="id"
+                wx:for-item="category"
+                bindtap="selectCategory"
+                data-feedback-id="{{feedback.id}}"
+                data-category-name="{{category.name}}"
+              >
+                <text class="category-icon">{{category.icon}}</text>
+                <text class="category-name">{{category.name}}</text>
+              </view>
+            </view>
+          </scroll-view>
+          
+          <view class="opinion-section" wx:if="{{feedback.showOpinion}}">
+            <textarea 
+              class="opinion-input" 
+              placeholder="请输入处理意见（选填）" 
+              placeholder-class="placeholder"
+              bindinput="onOpinionInput"
+              data-id="{{feedback.id}}"
+              value="{{feedback.opinion}}"
+            ></textarea>
+          </view>
+
+          <view class="action-buttons">
+            <button 
+              class="submit-btn {{!feedback.selectedCategory ? 'disabled' : ''}}" 
+              disabled="{{!feedback.selectedCategory}}"
+              bindtap="submitClassification"
+              data-id="{{feedback.id}}"
+            >
+              <text class="btn-icon">✓</text>
+              <text>提交分类</text>
+            </button>
+            <view class="more-btn" bindtap="toggleOpinion" data-id="{{feedback.id}}">
+              <text class="more-icon">{{feedback.showOpinion ? '📝' : '➕'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 加载更多提示 -->
+    <view class="load-more" wx:if="{{hasMore && pendingFeedbacks.length > 0}}">
+      <view class="load-animation">
+        <view class="dot"></view>
+        <view class="dot"></view>
+        <view class="dot"></view>
+      </view>
+      <text>加载更多...</text>
+    </view>
+    <view class="no-more" wx:elif="{{!hasMore && pendingFeedbacks.length > 0}}">
+      <text>—— 没有更多了 ——</text>
+    </view>
+  </scroll-view>
+</view>

@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "乡镇服务反馈",
+  "usingComponents": {},
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#f8f9ff",
+  "backgroundTextStyle": "dark",
+  "navigationBarBackgroundColor": "#048dfd",
+  "navigationBarTextStyle": "white"
+}

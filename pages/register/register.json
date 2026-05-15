@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "账号注册",
+  "navigationBarBackgroundColor": "#048dfd",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f5f5f5",
+  "disableScroll": true,
+  "usingComponents": {}
+}

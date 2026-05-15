@@ -1,0 +1,283 @@
+/* pages/index/index.wxss */
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 20rpx;
+}
+
+/* 卡片通用样式 */
+.card {
+  background: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 用户卡片 */
+.user-card {
+  background: linear-gradient(135deg, #048dfd 0%, #6ab0ff 100%);
+  color: white;
+}
+
+.user-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.welcome-text {
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+.user-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-left: 10rpx;
+}
+
+.login-link {
+  font-size: 32rpx;
+  font-weight: bold;
+  text-decoration: underline;
+  margin-left: 10rpx;
+}
+
+/* 消息入口 */
+.message-entry {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10rpx 20rpx;
+  border-radius: 40rpx;
+  position: relative;
+}
+
+.message-icon-text {
+  font-size: 32rpx;
+  margin-right: 10rpx;
+}
+
+.message-badge {
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  background: #f44336;
+  color: white;
+  font-size: 20rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6rpx;
+}
+
+/* 公告卡片 */
+.notice-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.notice-icon-text {
+  font-size: 36rpx;
+  margin-right: 10rpx;
+  color: #048dfd;
+}
+
+.title-text {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.more-link {
+  font-size: 26rpx;
+  color: #999;
+  padding: 10rpx;
+}
+
+.notice-content {
+  font-size: 30rpx;
+  color: #333;
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.notice-time {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 15rpx;
+}
+
+/* 服务网格 */
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 30rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.section-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: normal;
+}
+
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20rpx;
+}
+
+.service-item {
+  text-align: center;
+  padding: 20rpx 0;
+}
+
+.service-icon-text {
+  font-size: 48rpx;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.item-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 管理员网格 */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+}
+
+.admin-item {
+  text-align: center;
+  padding: 20rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  position: relative;
+}
+
+.admin-icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.admin-icon-text {
+  font-size: 48rpx;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.admin-text {
+  font-size: 24rpx;
+  color: #333;
+}
+
+.admin-badge {
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  background: #f44336;
+  color: white;
+  font-size: 20rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6rpx;
+}
+
+/* 数据网格 */
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.data-item {
+  text-align: center;
+}
+
+.data-num {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #048dfd;
+  margin-bottom: 10rpx;
+}
+
+.data-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 进度条 */
+.progress-section {
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 12rpx;
+}
+
+.progress-bar-bg {
+  height: 12rpx;
+  background-color: #f0f0f0;
+  border-radius: 6rpx;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #048dfd, #6ab0ff);
+  border-radius: 6rpx;
+  transition: width 0.3s ease;
+}
+
+/* 底部 */
+.footer {
+  text-align: center;
+  padding: 40rpx 0;
+}
+
+.refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 20rpx 40rpx;
+  background: white;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  color: #666;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.refresh-icon-text {
+  font-size: 32rpx;
+  margin-right: 10rpx;
+}
+
+.copyright {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: #999;
+}

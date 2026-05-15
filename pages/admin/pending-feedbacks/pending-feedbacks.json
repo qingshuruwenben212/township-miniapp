@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "待分类反馈",
+  "navigationBarBackgroundColor": "#048dfd",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#f5f5f5"
+}

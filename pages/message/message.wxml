@@ -1,0 +1,75 @@
+<!-- pages/message/message.wxml -->
+<view class="container">
+  <!-- 头部 -->
+  <view class="header">
+    <view class="header-title">
+      <text class="title">消息中心</text>
+      <text class="count" wx:if="{{unreadCount > 0}}">{{unreadCount}} 条未读</text>
+    </view>
+    <view class="header-actions">
+      <view class="action-btn" wx:if="{{unreadCount > 0}}" bindtap="markAllRead">
+        <text class="btn-icon">✓</text>
+        <text>全部已读</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 消息列表 -->
+  <scroll-view 
+    class="message-list" 
+    scroll-y 
+    bindscrolltolower="loadMore"
+    lower-threshold="100"
+  >
+    <!-- 加载状态 -->
+    <view class="loading" wx:if="{{isLoading && messages.length === 0}}">
+      <text>加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:elif="{{messages.length === 0}}" class="empty-state">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">暂无消息</text>
+    </view>
+
+    <!-- 消息列表 -->
+    <block wx:for="{{messages}}" wx:key="id">
+      <view 
+        class="message-item {{item.is_read ? 'read' : 'unread'}}"
+        bindtap="markAsRead"
+        data-id="{{item.id}}"
+        data-index="{{index}}"
+      >
+        <!-- 消息图标（根据类型显示不同图标） -->
+        <view class="message-icon">
+          <text wx:if="{{item.type === 'user_audit'}}">✅</text>
+          <text wx:elif="{{item.type === 'feedback_result'}}">📋</text>
+          <text wx:elif="{{item.type === 'feedback_progress'}}">🔄</text>
+          <text wx:else>📢</text>
+        </view>
+
+        <!-- 消息内容 -->
+        <view class="message-content">
+          <view class="message-header">
+            <text class="message-title">{{item.title}}</text>
+            <text class="message-time">{{formatTime(item.created_at)}}</text>
+          </view>
+          <text class="message-desc">{{item.content}}</text>
+        </view>
+
+        <!-- 未读红点 -->
+        <view class="unread-dot" wx:if="{{!item.is_read}}"></view>
+
+        <!-- 删除按钮 -->
+        <view class="delete-btn" bindtap="deleteMessage" data-id="{{item.id}}" data-index="{{index}}" catchtap>
+          <text>🗑️</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- 加载更多提示 -->
+    <view class="loading-more" wx:if="{{hasMore && messages.length > 0}}">
+      <text>加载更多...</text>
+    </view>
+  </scroll-view>
+</view>

@@ -1,0 +1,64 @@
+<!-- pages/admin/pending-users.wxml -->
+<view class="container">
+  <!-- 头部 -->
+  <view class="header">
+    <view class="header-title">
+      <text class="title">待审核用户</text>
+      <text class="count" wx:if="{{totalCount > 0}}">{{totalCount}} 条待处理</text>
+    </view>
+    <view class="header-actions">
+      <view class="refresh-btn" bindtap="handleRefresh">
+        <text class="refresh-icon">🔄</text>
+        <text>刷新</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{isLoading && pendingUsers.length === 0}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 用户列表 -->
+  <scroll-view 
+    class="user-list" 
+    scroll-y 
+    bindscrolltolower="loadMore"
+    lower-threshold="100"
+    wx:else
+  >
+    <view wx:if="{{pendingUsers.length === 0}}" class="empty-state">
+      <text class="empty-icon">✅</text>
+      <text class="empty-text">暂无待审核用户</text>
+    </view>
+
+    <view wx:for="{{pendingUsers}}" wx:key="id" class="user-item">
+      <view class="user-avatar">
+        <text class="avatar-text">{{item.real_name.charAt(0)}}</text>
+      </view>
+      <view class="user-info">
+        <view class="user-name-row">
+          <text class="user-name">{{item.real_name}}</text>
+          <text class="user-username">{{item.username}}</text>
+        </view>
+        <view class="user-detail">
+          <text class="user-phone">📞 {{item.phone}}</text>
+          <text class="user-address">📍 {{item.address}}</text>
+        </view>
+        <view class="user-time">🕐 注册时间: {{item.displayTime || formatTime(item.created_at)}}</view>
+      </view>
+      <view class="user-actions">
+        <view class="action-btn approve" bindtap="approveUser" data-id="{{item.id}}" data-name="{{item.real_name}}">✓ 通过</view>
+        <view class="action-btn reject" bindtap="rejectUser" data-id="{{item.id}}" data-name="{{item.real_name}}">✗ 拒绝</view>
+      </view>
+    </view>
+
+    <!-- 加载更多提示 -->
+    <view class="loading-more" wx:if="{{hasMore && pendingUsers.length > 0}}">
+      <text>加载更多...</text>
+    </view>
+    <view class="no-more" wx:elif="{{!hasMore && pendingUsers.length > 0}}">
+      <text>没有更多了</text>
+    </view>
+  </scroll-view>
+</view>

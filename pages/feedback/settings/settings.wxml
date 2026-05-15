@@ -1,0 +1,187 @@
+<!-- pages/my/settings/settings.wxml -->
+<view class="settings-container">
+  <!-- 顶部标题栏 -->
+  <view class="settings-header">
+    <text class="header-title">账号设置</text>
+    <text class="header-desc">管理您的账户信息</text>
+  </view>
+
+  <!-- 基本信息卡片 -->
+  <view class="settings-card">
+    <view class="card-title">基本信息</view>
+    
+    <!-- 头像设置 -->
+    <view class="form-item" bindtap="changeAvatar">
+      <view class="form-label">头像：</view>
+      <view class="form-value">
+        <view class="avatar-section">
+          <image class="avatar-img" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+          <text class="change-text">点击更换</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 昵称设置 -->
+    <view class="form-item">
+      <view class="form-label">昵称：</view>
+      <view class="form-value">
+        <input 
+          class="form-input" 
+          placeholder="请输入昵称" 
+          value="{{userInfo.nickname || userInfo.name || ''}}"
+          bindinput="handleNicknameInput"
+          maxlength="20"
+        />
+      </view>
+    </view>
+
+    <!-- 真实姓名 -->
+    <view class="form-item">
+      <view class="form-label">真实姓名：</view>
+      <view class="form-value">
+        <input 
+          class="form-input" 
+          placeholder="请输入真实姓名" 
+          value="{{userInfo.name || ''}}"
+          bindinput="handleNameInput"
+          maxlength="10"
+        />
+      </view>
+    </view>
+    
+    <!-- 所属区域（乡村） -->
+    <view class="form-item" bindtap="selectRegion">
+      <view class="form-label">所属乡村：</view>
+      <view class="form-value region-value">
+        {{userInfo.village || userInfo.region || '请选择所在乡村'}}
+      </view>
+    </view>
+    
+    <!-- 用户类型（只读） -->
+    <view class="form-item readonly">
+      <view class="form-label">用户类型：</view>
+      <view class="form-value">{{userRoleName}}</view>
+    </view>
+  </view>
+
+  <!-- 账号安全卡片 -->
+  <view class="settings-card">
+    <view class="card-title">账号安全</view>
+    
+    <!-- 用户名 -->
+    <view class="form-item readonly">
+      <view class="form-label">用户名：</view>
+      <view class="form-value">{{userInfo.username || '未设置'}}</view>
+    </view>
+    
+    <!-- 修改密码 -->
+    <view class="form-item" bindtap="goToChangePassword">
+      <view class="form-label">修改密码：</view>
+      <view class="form-value">******</view>
+    </view>
+  </view>
+
+  <!-- 保存按钮 -->
+  <view class="action-buttons">
+    <button 
+      class="btn-save" 
+      bindtap="saveSettings"
+      disabled="{{!hasChanges || isSaving}}"
+    >
+      {{isSaving ? '保存中...' : '保存修改'}}
+    </button>
+    <button class="btn-cancel" bindtap="cancelEdit">取消</button>
+  </view>
+
+  <!-- 区域选择弹窗 -->
+  <view class="region-picker" wx:if="{{showRegionPicker}}">
+    <view class="picker-mask" bindtap="closeRegionPicker"></view>
+    <view class="picker-content">
+      <view class="picker-header">
+        <text class="picker-cancel" bindtap="closeRegionPicker">取消</text>
+        <text class="picker-title">选择所属乡村</text>
+        <text class="picker-confirm" bindtap="confirmRegion">确定</text>
+      </view>
+      <picker-view 
+        value="{{regionIndex}}" 
+        bindchange="handleRegionChange"
+        indicator-style="height: 50px;"
+        style="height: 300rpx; width: 100%;"
+      >
+        <picker-view-column>
+          <view wx:for="{{towns}}" wx:key="index" style="line-height: 50px; text-align: center;">{{item}}</view>
+        </picker-view-column>
+        <picker-view-column>
+          <view wx:for="{{villages}}" wx:key="index" style="line-height: 50px; text-align: center;">{{item}}</view>
+        </picker-view-column>
+      </picker-view>
+    </view>
+  </view>
+
+  <!-- 修改密码弹窗 -->
+  <view class="password-modal" wx:if="{{showPasswordModal}}">
+    <view class="modal-mask" bindtap="closePasswordModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">修改密码</text>
+      </view>
+      
+      <view class="password-form">
+        <!-- 原密码 -->
+        <view class="password-item">
+          <text class="password-label">原密码：</text>
+          <input 
+            class="password-input" 
+            type="password" 
+            placeholder="请输入原密码" 
+            value="{{oldPassword}}"
+            bindinput="handleOldPasswordInput"
+            password="true"
+          />
+        </view>
+        
+        <!-- 新密码 -->
+        <view class="password-item">
+          <text class="password-label">新密码：</text>
+          <input 
+            class="password-input" 
+            type="password" 
+            placeholder="请输入新密码（至少6位）" 
+            value="{{newPassword}}"
+            bindinput="handleNewPasswordInput"
+            password="true"
+          />
+        </view>
+        
+        <!-- 确认新密码 -->
+        <view class="password-item">
+          <text class="password-label">确认新密码：</text>
+          <input 
+            class="password-input" 
+            type="password" 
+            placeholder="请再次输入新密码" 
+            value="{{confirmPassword}}"
+            bindinput="handleConfirmPasswordInput"
+            password="true"
+          />
+        </view>
+        
+        <!-- 错误提示 -->
+        <view class="password-error" wx:if="{{passwordError}}">
+          <text class="error-text">{{passwordError}}</text>
+        </view>
+      </view>
+      
+      <view class="modal-actions">
+        <button class="modal-btn cancel" bindtap="closePasswordModal">取消</button>
+        <button 
+          class="modal-btn confirm" 
+          bindtap="confirmPasswordChange"
+          disabled="{{!canChangePassword || isChangingPassword}}"
+        >
+          {{isChangingPassword ? '修改中...' : '确认修改'}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

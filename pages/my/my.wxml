@@ -1,0 +1,53 @@
+<!-- pages/my/my.wxml -->
+<view class="my-container">
+  <!-- 用户信息卡片 -->
+  <view class="user-card" wx:if="{{isLogin && userInfo}}">
+    <image class="user-avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}"></image>
+    <view class="user-info">
+      <text class="user-name">{{userInfo.nickname || userInfo.name || userInfo.username || '用户'}}</text>
+      <view class="user-details">
+        <text class="user-role">{{userInfo.village || ''}}{{userInfo.type === 'villager' ? '普通村民' : 
+          userInfo.type === 'representative' ? '村民代表' : 
+          userInfo.type === 'cadre' ? '村干部' : 
+          userInfo.type === 'admin' ? '管理员' : '用户'}}</text>
+        <text class="user-id">账号: {{userInfo.username || '未知'}}</text>
+      </view>
+    </view>
+    <button class="refresh-btn" bindtap="refreshUserInfo">刷新</button>
+  </view>
+
+  <!-- 未登录状态 -->
+  <view class="login-prompt" wx:else>
+    <image class="prompt-avatar" src="/images/default-avatar.png"></image>
+    <text class="prompt-text">您还未登录</text>
+    <button class="login-btn" bindtap="goToLogin">立即登录</button>
+  </view>
+
+  <!-- 功能菜单（仅登录后显示） -->
+  <view class="menu-section" wx:if="{{isLogin}}">
+    <view class="menu-title">我的功能</view>
+    <view 
+      class="menu-item" 
+      wx:for="{{menuItems}}" 
+      wx:key="index" 
+      bindtap="navigateTo" 
+      data-url="{{item.url}}"
+    >
+      <text class="menu-icon">{{item.icon}}</text>
+      <text class="menu-name">{{item.name}}</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 平台信息（总是显示） -->
+  <view class="platform-info">
+    <text class="info-title">乡镇服务反馈平台</text>
+    <text class="info-version">版本 1.0.0</text>
+    <text class="info-desc">为乡镇居民提供便捷的反馈服务</text>
+  </view>
+
+  <!-- 退出登录按钮（仅登录后显示） -->
+  <view class="logout-section" wx:if="{{isLogin}}">
+    <button class="logout-btn" bindtap="handleLogout">退出登录</button>
+  </view>
+</view>

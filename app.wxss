@@ -1,0 +1,86 @@
+/* 基础样式重置（适配所有页面） */
+
+page {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #f5f5f5;
+  font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  color: #333333;
+  min-height: 100vh;
+}
+
+/* 通用组件样式（适配乡镇低门槛视觉需求） */
+.container {
+  padding: 15rpx;
+}
+
+.btn-primary {
+  background-color: #048dfd;
+  color: #ffffff;
+  border-radius: 8rpx;
+  font-size: 16px;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  margin: 20rpx 0;
+}
+
+.btn-disabled {
+  background-color: #cccccc;
+  color: #ffffff;
+  border-radius: 8rpx;
+  font-size: 16px;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  margin: 20rpx 0;
+}
+
+.form-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 30rpx;
+}
+
+.form-label {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 10rpx;
+  color: #333333;
+}
+
+.form-input {
+  background-color: #ffffff;
+  border: 1rpx solid #e5e5e5;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  font-size: 14px;
+}
+
+/* 状态提示样式（适配弱网络下用户引导） */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200rpx;
+  font-size: 14px;
+  color: #666666;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 50rpx 0;
+  color: #999999;
+}
+
+.empty-text {
+  font-size: 14px;
+  margin-top: 20rpx;
+}
+
+

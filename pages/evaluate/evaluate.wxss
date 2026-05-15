@@ -1,0 +1,438 @@
+/* pages/evaluate/evaluate.wxss */
+page {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.container {
+  padding: 0;
+  box-sizing: border-box;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部导航栏 */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  background: white;
+  border-bottom: 2rpx solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.nav-back, .nav-refresh {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: 40rpx;
+  color: #333;
+}
+
+.refresh-icon {
+  font-size: 36rpx;
+  color: #333;
+}
+
+.nav-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 统计卡片 */
+.stat-card {
+  background: white;
+  margin: 20rpx;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  display: flex;
+  justify-content: space-around;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.stat-item {
+  text-align: center;
+  flex: 1;
+}
+
+.stat-number {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #048dfd;
+  margin-bottom: 10rpx;
+}
+
+.stat-label {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 加载状态 */
+.loading-state {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 100rpx 0;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+  margin-bottom: 40rpx;
+}
+
+.refresh-btn {
+  width: 200rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+  background: #048dfd;
+  color: white;
+  font-size: 28rpx;
+  border-radius: 35rpx;
+}
+
+/* 反馈列表 */
+.feedback-list {
+  flex: 1;
+  padding: 20rpx;
+  box-sizing: border-box;
+}
+
+.feedback-item {
+  background: white;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.feedback-item.evaluated {
+  background: #f8f9fa;
+  border-left: 8rpx solid #4caf50;
+}
+
+.feedback-content {
+  flex: 1;
+  padding: 30rpx;
+}
+
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.feedback-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  flex: 1;
+  margin-right: 20rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feedback-time {
+  font-size: 24rpx;
+  color: #999;
+  white-space: nowrap;
+}
+
+.feedback-body {
+  margin-bottom: 20rpx;
+}
+
+.feedback-text {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.feedback-meta {
+  display: flex;
+  margin-bottom: 10rpx;
+  font-size: 26rpx;
+}
+
+.meta-label {
+  color: #999;
+  width: 120rpx;
+}
+
+.meta-value {
+  color: #333;
+  flex: 1;
+}
+
+/* 已评价信息 */
+.evaluated-info {
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #e0e0e0;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.star {
+  font-size: 32rpx;
+  color: #ddd;
+  margin-right: 4rpx;
+}
+
+.star.active {
+  color: #ff9800;
+}
+
+.rating-text {
+  font-size: 24rpx;
+  color: #ff9800;
+  margin-left: 10rpx;
+}
+
+.comment-text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* 评价按钮 */
+.evaluate-btn {
+  width: 120rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #048dfd;
+  color: white;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.feedback-item.evaluated .evaluate-btn {
+  background: #4caf50;
+}
+
+.btn-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  letter-spacing: 4rpx;
+  padding: 20rpx 0;
+}
+
+/* 加载更多 */
+.load-more,
+.no-more {
+  text-align: center;
+  padding: 30rpx;
+  color: #999;
+  font-size: 24rpx;
+}
+
+/* 弹窗样式 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 650rpx;
+  max-width: 90%;
+  background: white;
+  border-radius: 24rpx;
+  z-index: 1001;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-close {
+  font-size: 32rpx;
+  color: #999;
+  padding: 10rpx;
+}
+
+.modal-body {
+  padding: 30rpx;
+}
+
+.feedback-info {
+  background: #f5f5f5;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.info-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.info-content {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.5;
+  display: block;
+}
+
+.rating-section {
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.rating-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.rating-stars {
+  display: flex;
+  justify-content: center;
+  gap: 20rpx;
+  margin: 20rpx 0;
+}
+
+.star {
+  font-size: 60rpx;
+  color: #ddd;
+  transition: all 0.2s;
+}
+
+.star.active {
+  color: #ff9800;
+}
+
+.rating-text {
+  font-size: 26rpx;
+  color: #ff9800;
+  display: block;
+  margin-top: 10rpx;
+}
+
+.comment-section {
+  margin-bottom: 20rpx;
+}
+
+.comment-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 15rpx;
+  display: block;
+}
+
+.comment-input {
+  width: 100%;
+  background: #f5f5f5;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  color: #333;
+  box-sizing: border-box;
+  min-height: 150rpx;
+}
+
+.word-count {
+  text-align: right;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+
+.modal-footer {
+  display: flex;
+  padding: 30rpx;
+  border-top: 2rpx solid #f0f0f0;
+  gap: 20rpx;
+  position: sticky;
+  bottom: 0;
+  background: white;
+}
+
+.modal-btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  margin: 0;
+}
+
+.modal-btn.cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.modal-btn.confirm {
+  background: #048dfd;
+  color: white;
+}
+
+.modal-btn.confirm[disabled] {
+  opacity: 0.5;
+}

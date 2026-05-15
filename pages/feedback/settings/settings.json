@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "账号设置",
+  "navigationBarBackgroundColor": "#048dfd",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f5f5f5",
+  "enablePullDownRefresh": false,
+  "usingComponents": {}
+}

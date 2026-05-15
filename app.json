@@ -1,0 +1,57 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/feedback/submit/submit",
+    "pages/my/my",
+    "pages/login/login",
+    "pages/register/register",
+    "pages/message/message",
+    "pages/feedback/detail/detail",
+    "pages/feedback/list/list",
+    "pages/feedback/settings/settings",
+    "pages/admin/pending-users/pending-users",
+    "pages/admin/pending-feedbacks/pending-feedbacks",
+    "pages/admin/department-pending/department-pending",
+    "pages/ai/ai",
+    "pages/webview/webview",
+    "pages/evaluate/evaluate"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#048dfd",
+    "navigationBarTitleText": "乡镇服务反馈平台",
+    "navigationBarTextStyle": "white",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#048dfd",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "position": "bottom",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/tab_home.png",
+        "selectedIconPath": "images/tab_home_active.png"
+      },
+      {
+        "pagePath": "pages/feedback/submit/submit",
+        "text": "提交反馈",
+        "iconPath": "images/tab_feedback.png",
+        "selectedIconPath": "images/tab_feedback_active.png"
+      },
+      {
+        "pagePath": "pages/my/my",
+        "text": "我的",
+        "iconPath": "images/tab_mine.png",
+        "selectedIconPath": "images/tab_mine_active.png"
+      }
+    ]
+  },
+  "permission": {},
+  "requiredPrivateInfos": [],
+  "usingComponents": {},
+  "sitemapLocation": "sitemap.json"
+}
