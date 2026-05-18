@@ -3,7 +3,7 @@
   "cloudfunctionRoot": "cloudfunctions/",
   "compileType": "miniprogram",
   "projectname": "轻量化AI乡镇服务反馈智能平台",
-  "appid": "wx23bf09ce2ce02077",
+  "appid": "",
   "setting": {
     "urlCheck": true,
     "es6": true,
